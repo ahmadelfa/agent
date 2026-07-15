@@ -15,6 +15,7 @@ client = OpenAI(
 
 parser = argparse.ArgumentParser(description="Chatbot")
 parser.add_argument("user_prompt", type=str, help="User prompt")
+parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 args = parser.parse_args()
 
 messages=[
@@ -26,13 +27,12 @@ messages=[
 
 response = client.chat.completions.create(model="openrouter/free", messages=messages,)
 
-print(f"User prompt: {args.user_prompt}")
-
-
-if response.usage is not None:
-    print(f"Prompt tokens: {response.usage.prompt_tokens}")
-    print(f"Response tokens: {response.usage.completion_tokens}")
-else:
-    raise RuntimeError("No usage info returned.")
+if args.verbose:
+    print(f"User prompt: {args.user_prompt}")
+    if response.usage is not None:
+        print(f"Prompt tokens: {response.usage.prompt_tokens}")
+        print(f"Response tokens: {response.usage.completion_tokens}")
+    else:
+        raise RuntimeError("No usage info returned.")
 
 print(f"Response: {response.choices[0].message.content}")
