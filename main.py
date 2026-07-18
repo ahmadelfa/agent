@@ -1,6 +1,8 @@
-import os, argparse
+import os, argparse, json
 from dotenv import load_dotenv
 from openai import OpenAI
+from prompts import system_prompt
+from call_function import available_functions, call_function
 
 load_dotenv()
 api_key = os.environ.get("OPENROUTER_API_KEY")
@@ -19,13 +21,11 @@ parser.add_argument("--verbose", action="store_true", help="Enable verbose outpu
 args = parser.parse_args()
 
 messages=[
-    {
-        "role": "user",
-        "content": args.user_prompt,
-    }
+    {"role": "system", "content": system_prompt},
+    {"role": "user", "content": args.user_prompt},
 ]
 
-response = client.chat.completions.create(model="openrouter/free", messages=messages,)
+response = client.chat.completions.create(model="openrouter/free", messages=messages, tools=available_functions,)
 
 if args.verbose:
     print(f"User prompt: {args.user_prompt}")
@@ -35,4 +35,14 @@ if args.verbose:
     else:
         raise RuntimeError("No usage info returned.")
 
-print(f"Response: {response.choices[0].message.content}")
+message = response.choices[0].message
+
+if message.tool_calls:
+    for tool_call in message.tool_calls:
+        result_message = call_function(tool_call, args.verbose)
+        if result_message["content"] == None or "":
+            raise Exception("Tool call returned empty content")
+        if args.verbose:
+            print(f"-> {result_message['content']}")
+else:
+    print(f"Response: {message.content}")
