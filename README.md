@@ -12,4 +12,6 @@ The harness includes all the basic things you'd expect a coding agent to have, s
 2. Run `uv sync` in the root of the project directory
 3. Rename `.env.example` to `.env`
 4. Add your OpenRouter API key to `.env`
-5. Run the agent using `uv run main.py [your prompt here]`
+5. Run the agent using `uv run main.py "[your prompt here]"`
+
+Note: the `calculator` directory is a sample working directory. Feel free to modify the corresponding variable in `config.py` as needed.
